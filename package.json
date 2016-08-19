@@ -1,0 +1,15 @@
+{
+  "name": "roon-extension-powermate",
+  "version": "1.0.0",
+  "description": "Roon Extension to let the Griffin Powermate (USB) control zones",
+  "main": "app.js",
+  "author": "Roon Labs, LLC",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "node-powermate": "0.0.5",
+    "node-roon-api": "github:roonlabs/node-roon-api",
+    "node-roon-api-settings": "github:roonlabs/node-roon-api-settings",
+    "node-roon-api-status": "github:roonlabs/node-roon-api-status",
+    "node-roon-api-transport": "github:roonlabs/node-roon-api-transport"
+  }
+}
