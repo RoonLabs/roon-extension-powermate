@@ -189,7 +189,7 @@ var extension = roon.extension({
     display_version:     "1.0.0",
     publisher:           'Roon Labs, LLC',
     email:               'contact@roonlabs.com',
-    website:             'http://roonlabs.com/extensions/roon-extension-powermate',
+    website:             'https://github.com/RoonLabs/roon-extension-powermate',
     required_services:   [ RoonApiTransport ],
     optional_services:   [ ],
     provided_services:   [ svc_settings, svc_status ],
