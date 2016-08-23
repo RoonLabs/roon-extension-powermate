@@ -120,9 +120,9 @@ var svc_status = new RoonApiStatus(roon);
 
 function update_status() {
     if (powermate.hid)
-	svc_status.set_status("Connected to 1 PowerMate", false);
+	svc_status.set_status("Connected to 1 USB device.", false);
     else
-	svc_status.set_status("Could not find PowerMate", true)
+	svc_status.set_status("Could not find USB device.", true)
 }
 
 var powermate = { };
@@ -155,6 +155,7 @@ function ev_buttondown() {
         if (seq != pressseq) return;
 	console.log('powermate longpress');
         ignoreup = true;
+        if (!core) return;
 	if      (mysettings.longpressaction == "toggleplay") core.services.RoonApiTransport.control(mysettings.zone, 'playpause');
 	else if (mysettings.longpressaction == "stop")       core.services.RoonApiTransport.control(mysettings.zone, 'stop');
 	else if (mysettings.longpressaction == "togglemute") core.services.RoonApiTransport.mute(mysettings.zone, 'toggle');
