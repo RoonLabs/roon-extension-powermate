@@ -112,7 +112,7 @@ var svc_settings = new RoonApiSettings(roon, {
         req.send_complete("Success", { settings: settings, layout: l.layout });
         if (!isdryrun) {
             mysettings = settings;
-            svc_settings.set_settings(mysettings, l.layout);
+            svc_settings.update_settings(mysettings, l.layout);
             roon.save_config("settings", mysettings);
         }
     }

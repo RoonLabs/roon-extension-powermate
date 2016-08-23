@@ -6,7 +6,7 @@
   "author": "Roon Labs, LLC",
   "license": "Apache-2.0",
   "dependencies": {
-    "node-powermate": "0.0.5",
+    "node-powermate": "github:dannydulai/node-powermate",
     "node-roon-api": "github:roonlabs/node-roon-api",
     "node-roon-api-settings": "github:roonlabs/node-roon-api-settings",
     "node-roon-api-status": "github:roonlabs/node-roon-api-status",
