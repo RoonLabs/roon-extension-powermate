@@ -100,21 +100,23 @@ function makelayout(settings) {
 }
 
 var svc_settings = new RoonApiSettings(roon, {
+    get_settings: function(cb) {
+        cb(mysettings, makelayout(mysettings).layout);
+    },
     save_settings: function(req, isdryrun, settings) {
 	let l = makelayout(settings);
 	if (l.has_error) {
 	    req.send_complete("NotValid", { settings: settings, layout: l.layout });
             return;
         }
+        req.send_complete("Success", { settings: settings, layout: l.layout });
         if (!isdryrun) {
             mysettings = settings;
             svc_settings.set_settings(mysettings, l.layout);
             roon.save_config("settings", mysettings);
         }
-        req.send_complete("Success", { settings: settings, layout: l.layout });
     }
 });
-svc_settings.set_settings(mysettings, makelayout(mysettings).layout);
 
 var svc_status = new RoonApiStatus(roon);
 
