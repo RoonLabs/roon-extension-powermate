@@ -20,6 +20,7 @@ var mysettings = roon.load_config("settings") || {
 
 function makelayout(settings) {
     var l = {
+        values:    settings,
 	layout:    [],
 	has_error: false
     };
@@ -74,9 +75,9 @@ function makelayout(settings) {
 	type:    "dropdown",
 	title:   "Rotation Action",
 	values:  [
-	    { title: "Change Volume",      value: "volume"  },
-	    { title: "Seek Song Position", value: "seek"    },
-	    { title: "Nothing",            value: "none"    },
+	    { title: "Change Volume", value: "volume"  },
+	    { title: "Seek Position", value: "seek"    },
+	    { title: "Nothing",       value: "none"    },
 	],
 	setting: "rotateaction",
     });
@@ -101,18 +102,15 @@ function makelayout(settings) {
 
 var svc_settings = new RoonApiSettings(roon, {
     get_settings: function(cb) {
-        cb(mysettings, makelayout(mysettings).layout);
+        cb(makelayout(mysettings));
     },
     save_settings: function(req, isdryrun, settings) {
-	let l = makelayout(settings);
-	if (l.has_error) {
-	    req.send_complete("NotValid", { settings: settings, layout: l.layout });
-            return;
-        }
-        req.send_complete("Success", { settings: settings, layout: l.layout });
-        if (!isdryrun) {
-            mysettings = settings;
-            svc_settings.update_settings(mysettings, l.layout);
+	let l = makelayout(settings.values);
+        req.send_complete(l.has_error ? "NotValid" : "Success", { settings: l });
+
+        if (!isdryrun && !l.has_error) {
+            mysettings = l.values;
+            svc_settings.update_settings(l);
             roon.save_config("settings", mysettings);
         }
     }
@@ -178,6 +176,7 @@ function ev_buttonup() {
 function ev_wheelturn(delta) {
     console.log('powermate turned', delta);
     if (!core) return;
+    if (!mysettings.zone) return;
     if      (mysettings.rotateaction == "volume") core.services.RoonApiTransport.change_volume(mysettings.zone, 'relative_step', delta);
     else if (mysettings.rotateaction == "seek") core.services.RoonApiTransport.seek(mysettings.zone, 'relative', delta * mysettings.seekamount);
 }
