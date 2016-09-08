@@ -7,7 +7,24 @@ var PowerMate        = require("node-powermate"),
     RoonApiTransport = require('node-roon-api-transport');
 
 var core;
-var roon = new RoonApi();
+var roon = new RoonApi({
+    extension_id:        'com.roonlabs.griffinpowermate.controller',
+    display_name:        'Griffin Powermate USB controller',
+    display_version:     "1.0.0",
+    publisher:           'Roon Labs, LLC',
+    email:               'contact@roonlabs.com',
+    website:             'https://github.com/RoonLabs/roon-extension-powermate',
+    required_services:   [ RoonApiTransport ],
+    optional_services:   [ ],
+    provided_services:   [ svc_settings, svc_status ],
+
+    core_paired: function(core_) {
+        core = core_;
+    },
+    core_unpaired: function(core_) {
+	core = undefined;
+    }
+});
 
 var mysettings = roon.load_config("settings") || {
     zone:             null,
@@ -184,25 +201,5 @@ function ev_wheelturn(delta) {
 setup_powermate();
 update_status();
 setInterval(() => { if (!powermate.hid) setup_powermate(); }, 1000);
-
-var extension = roon.extension({
-    extension_id:        'com.roonlabs.griffinpowermate.controller',
-    display_name:        'Griffin Powermate USB controller',
-    display_version:     "1.0.0",
-    publisher:           'Roon Labs, LLC',
-    email:               'contact@roonlabs.com',
-    website:             'https://github.com/RoonLabs/roon-extension-powermate',
-    required_services:   [ RoonApiTransport ],
-    optional_services:   [ ],
-    provided_services:   [ svc_settings, svc_status ],
-
-    core_paired: function(core_) {
-        core = core_;
-    },
-    core_unpaired: function(core_) {
-	core = undefined;
-    }
-});
-
 
 roon.start_discovery();
