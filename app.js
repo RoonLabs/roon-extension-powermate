@@ -14,9 +14,6 @@ var roon = new RoonApi({
     publisher:           'Roon Labs, LLC',
     email:               'contact@roonlabs.com',
     website:             'https://github.com/RoonLabs/roon-extension-powermate',
-    required_services:   [ RoonApiTransport ],
-    optional_services:   [ ],
-    provided_services:   [ svc_settings, svc_status ],
 
     core_paired: function(core_) {
         core = core_;
@@ -134,6 +131,11 @@ var svc_settings = new RoonApiSettings(roon, {
 });
 
 var svc_status = new RoonApiStatus(roon);
+
+roon.init_services({
+    required_services:   [ RoonApiTransport ],
+    provided_services:   [ svc_settings, svc_status ],
+});
 
 function update_status() {
     if (powermate.hid)
