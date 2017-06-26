@@ -52,6 +52,7 @@ function makelayout(settings) {
 	    { title: "Toggle Play/Pause", value: "toggleplay" },
 	    { title: "Toggle Mute",       value: "togglemute" },
 	    { title: "Stop Playback",     value: "stop"       },
+	    { title: "Standby",           value: "standby"    },
 	    { title: "Nothing",           value: "none"       },
 	],
 	setting: "pressaction",
@@ -64,6 +65,7 @@ function makelayout(settings) {
 	    { title: "Toggle Play/Pause", value: "toggleplay" },
 	    { title: "Toggle Mute",       value: "togglemute" },
 	    { title: "Stop Playback",     value: "stop"       },
+	    { title: "Standby",           value: "standby"    },
 	    { title: "Nothing",           value: "none"       },
 	],
 	setting: "longpressaction",
@@ -178,6 +180,7 @@ function ev_buttondown() {
 	if      (mysettings.longpressaction == "toggleplay") core.services.RoonApiTransport.control(mysettings.zone, 'playpause');
 	else if (mysettings.longpressaction == "stop")       core.services.RoonApiTransport.control(mysettings.zone, 'stop');
 	else if (mysettings.longpressaction == "togglemute") core.services.RoonApiTransport.mute(mysettings.zone, 'toggle');
+	else if (mysettings.longpressaction == "standby")    core.services.RoonApiTransport.standby(mysettings.zone);
     }, mysettings.longpresstimeout);
 }
 
@@ -187,9 +190,10 @@ function ev_buttonup() {
     if (!core) return;
     if (ignoreup) return;
     console.log('powermate press');
-    if      (mysettings.pressaction == "toggleplay") core.services.RoonApiTransport.control(mysettings.zone, 'playpause');
-    else if (mysettings.pressaction == "stop")       core.services.RoonApiTransport.control(mysettings.zone, 'stop');
-    else if (mysettings.pressaction == "togglemute") core.services.RoonApiTransport.mute(mysettings.zone, 'toggle');
+    if      (mysettings.pressaction == "toggleplay")  core.services.RoonApiTransport.control(mysettings.zone, 'playpause');
+    else if (mysettings.pressaction == "stop")        core.services.RoonApiTransport.control(mysettings.zone, 'stop');
+    else if (mysettings.pressaction == "togglemute")  core.services.RoonApiTransport.mute(mysettings.zone, 'toggle');
+    else if (mysettings.longpressaction == "standby") core.services.RoonApiTransport.standby(mysettings.zone);
 }
 
 function ev_wheelturn(delta) {
