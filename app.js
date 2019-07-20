@@ -6,6 +6,7 @@ var PowerMate        = require("node-powermate"),
     RoonApiStatus    = require('node-roon-api-status'),
     RoonApiTransport = require('node-roon-api-transport');
 
+var playingstate = '';
 var core;
 var roon = new RoonApi({
     extension_id:        'com.roonlabs.griffinpowermate.controller',
@@ -17,6 +18,27 @@ var roon = new RoonApi({
 
     core_paired: function(core_) {
         core = core_;
+
+        let transport = core.services.RoonApiTransport;
+        transport.subscribe_zones(function(cmd, data) {
+	    try {
+		if (cmd == "Changed" && data['zones_changed']) {
+		    data.zones_changed.forEach(z => {
+			if (z.outputs) {
+			    let found = false;
+			    z.outputs.forEach(o => { console.log(o.output_id, mysettings.zone.output_id); found = found || o.output_id == mysettings.zone.output_id; });
+			    if (found) {
+				if (playingstate != z.state) {
+				    playingstate = z.state;
+				    update_led();
+				}
+			    }
+			}
+		    });
+		}
+	    } catch (e) {
+	    }
+	});
     },
     core_unpaired: function(core_) {
 	core = undefined;
@@ -30,6 +52,7 @@ var mysettings = Object.assign({
     longpressaction:  "stop",
     longpresstimeout: 500,
     rotateaction:     "volume",
+    led:              "on",
     seekamount:       5,
     rotationdampener: 1
 }, roon.load_config("settings") || {});
@@ -57,6 +80,16 @@ function makelayout(settings) {
 	setting: "hiddriver",
     });
 
+    l.layout.push({
+	type:    "dropdown",
+	title:   "LED Status",
+	values:  [
+	    { title: "Always On",        value: "on" },
+	    { title: "On when playing",  value: "whenplaying" },
+	    { title: "Off",              value: "off" },
+	],
+	setting: "led",
+    });
     l.layout.push({
 	type:    "dropdown",
 	title:   "Press Action",
@@ -154,6 +187,7 @@ var svc_settings = new RoonApiSettings(roon, {
             mysettings = l.values;
             svc_settings.update_settings(l);
             roon.save_config("settings", mysettings);
+	    update_led();
         }
     }
 });
@@ -189,6 +223,21 @@ function setup_powermate() {
 	update_status();
     } catch (e) {
 //	console.log(e);
+    }
+}
+
+function update_led() {
+    if (powermate.hid) {
+	if (mysettings.led == "on") {
+	    powermate.hid.setBrightness(255);
+        } else if (mysettings.led == "whenplaying") {
+	    if (playingstate == "playing")
+		powermate.hid.setBrightness(255);
+	    else
+		powermate.hid.setBrightness(0);
+        } else {
+	    powermate.hid.setBrightness(0);
+	}
     }
 }
 
