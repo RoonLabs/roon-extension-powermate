@@ -23,15 +23,16 @@ var roon = new RoonApi({
     }
 });
 
-var mysettings = roon.load_config("settings") || {
+var mysettings = Object.assign({
     hiddriver:        'hidraw',
     zone:             null,
     pressaction:      "togglemute",
     longpressaction:  "stop",
     longpresstimeout: 500,
     rotateaction:     "volume",
-    seekamount:       5
-};
+    seekamount:       5,
+    rotationdampener: 1
+}, roon.load_config("settings") || {});
 
 function makelayout(settings) {
     var l = {
@@ -124,6 +125,20 @@ function makelayout(settings) {
         l.layout.push(v);
     }
 
+    if (settings.rotateaction != "none") {
+	    l.layout.push({
+		type:     "dropdown",
+		title:    "Rotation Dampener",
+		values:  [
+		    { title: "None",           value: 1       },
+		    { title: "Some",           value: 3       },
+		    { title: "More",           value: 5       },
+		    { title: "Most",           value: 7       },
+		],
+		setting: "rotationdampener",
+	    });
+	}
+
     return l;
 }
 
@@ -208,12 +223,32 @@ function ev_buttonup() {
     else if (mysettings.longpressaction == "standby") core.services.RoonApiTransport.standby(mysettings.zone);
 }
 
+let wheelpostime = 0;
+let wheelpos = 0;
 function ev_wheelturn(delta) {
-    console.log('powermate turned', delta);
-    if (!core) return;
-    if (!mysettings.zone) return;
-    if      (mysettings.rotateaction == "volume") core.services.RoonApiTransport.change_volume(mysettings.zone, 'relative_step', delta);
-    else if (mysettings.rotateaction == "seek") core.services.RoonApiTransport.seek(mysettings.zone, 'relative', delta * mysettings.seekamount);
+    let now = (new Date()).getTime();
+    if (!wheelpostime || (now - wheelpostime) > 750) {
+	wheelpos = delta;
+    } else {
+        wheelpos += delta;
+    }
+    wheelpostime = now;
+
+    let t = wheelpos / mysettings.rotationdampener;
+    if (t >= 1 || t <= -1) {
+        if (t > 0)
+	    t = Math.floor(t);
+	else
+            t = Math.ceil(t);
+       wheelpos -= t * mysettings.rotationdampener;
+
+	console.log('powermate turned', t);
+	if (!core) return;
+	if (!mysettings.zone) return;
+	if      (mysettings.rotateaction == "volume") core.services.RoonApiTransport.change_volume(mysettings.zone, 'relative_step', t);
+	else if (mysettings.rotateaction == "seek") core.services.RoonApiTransport.seek(mysettings.zone, 'relative', t * mysettings.seekamount);
+
+    }
 }
 
 setup_powermate();
