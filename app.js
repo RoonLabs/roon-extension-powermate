@@ -24,6 +24,7 @@ var roon = new RoonApi({
 });
 
 var mysettings = roon.load_config("settings") || {
+    hiddriver:        'hidraw',
     zone:             null,
     pressaction:      "togglemute",
     longpressaction:  "stop",
@@ -43,6 +44,16 @@ function makelayout(settings) {
 	type:    "zone",
 	title:   "Zone",
 	setting: "zone",
+    });
+
+    l.layout.push({
+	type:    "dropdown",
+	title:   "HID Driver",
+	values:  [
+	    { title: "HID Raw", value: "hidraw" },
+	    { title: "LibUSB",  value: "libusb" },
+	],
+	setting: "hiddriver",
     });
 
     l.layout.push({
@@ -155,13 +166,14 @@ function setup_powermate() {
     }
 
     try {
-        powermate.hid = new PowerMate();
+        powermate.hid = new PowerMate({ hidDriver: mysettings.hiddriver });
         powermate.hid.on('buttonDown', ev_buttondown);
         powermate.hid.on('buttonUp', ev_buttonup);
         powermate.hid.on('wheelTurn',  ev_wheelturn);
         powermate.hid.on('disconnected', () => { delete(powermate.hid); update_status(); });
 	update_status();
     } catch (e) {
+//	console.log(e);
     }
 }
 
